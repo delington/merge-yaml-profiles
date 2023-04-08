@@ -4,26 +4,33 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.Map;
 
 public class MergeYamlProfiles {
+
+    public static final String APPLICATION_YML = "application.yml";
+    public static final String APPLICATION_DEV_YML = "application-dev.yml";
+    public static final String MERGED_CONFIG_YML = "src/main/resources/merged-config.yml";
+
     public static void main(String[] args) {
         DumperOptions options = new DumperOptions();
         options.setPrettyFlow(true);
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         Yaml yaml = new Yaml(options);
 
-        Map<String, Object> defaultConfig = loadYaml("application.yml", yaml);
-        Map<String, Object> devConfig = loadYaml("application-dev.yml", yaml);
+        Map<String, Object> defaultConfig = loadYaml(APPLICATION_YML, yaml);
+        Map<String, Object> devConfig = loadYaml(APPLICATION_DEV_YML, yaml);
 
         // Merge dev config into default config
         mergeConfigs(defaultConfig, devConfig);
 
         // Output merged config to file
-        String mergedConfigPath = Paths.get("src", "main", "resources", "merged-config.yml").toString();
+        writeToFile(yaml, defaultConfig);
+    }
+
+    private static void writeToFile(Yaml yaml, Map<String, Object> defaultConfig) {
         try {
-            FileWriter writer = new FileWriter(mergedConfigPath);
+            FileWriter writer = new FileWriter(MERGED_CONFIG_YML);
             yaml.dump(defaultConfig, writer);
             writer.close();
             System.out.println("Merged configuration written to merged-config.yml");
